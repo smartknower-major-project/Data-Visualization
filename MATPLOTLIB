@@ -1,0 +1,68 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+df=pd.read_csv('/content/drive/My Drive/covid19_italy_region.csv')
+df
+
+df.drop(['Latitude','Longitude','HospitalizedPatients','IntensiveCarePatients','HomeConfinement','Country','RegionCode','TestsPerformed'],axis=1 , inplace=True)
+df.rename(columns={'CurrentPositiveCases':"Active_Case",'RegionName':"Region","TotalPositiveCases":"Confirmed Cases"},inplace=True)
+#df.dropna(subset = ["TestsPerformed"], inplace=True)
+df.head()
+
+
+#LINE PLOT
+r=df["Region"].unique()
+s={}
+plt.figure(figsize=(20,10))
+for i in r:
+  s[i]=df[df["Region"]==i]
+  plt.plot(s[i]['Confirmed Cases'],label=i)
+plt.legend()
+plt.title("Total Confirmed Cases")
+plt.show();
+
+
+#BAR GRAPH
+d=[]
+R=[]
+for i in r:
+  d.append(s[i]["Deaths"].sum())             
+  R.append(s[i]["Recovered"].sum())                                          
+f,a=plt.subplots()
+f.set_size_inches(30,10)
+w=0.4
+l=np.arange(len(r))
+c_d=a.bar(l-w/2,d,w,color='r',label="Total Death Cases")                       
+c_r=a.bar(l+w/2,R,w,color='g',label="Total Recovered Cases")
+a.set_xticks(l)                                                                 
+a.set_xticklabels(r)
+a.set_xlabel("Region")
+a.set_ylabel("Number of cases")
+a.legend()
+def labelling(C):
+  for c in C:
+    h=c.get_height()
+    a.annotate(h,xy=(c.get_x()+c.get_width()/2,h),xytext=(0,8),textcoords="offset points",ha="center",va="bottom")
+labelling(c_d)
+labelling(c_r)
+plt.show()
+
+
+#SCATTER PLOT
+plt.figure(figsize=(15,10))
+ for i in r:
+  p=s[i].iloc[6:37,:]
+  plt.subplot(121)
+  plt.plot(p["NewPositiveCases"].sum(),'o',label=i)
+  plt.title("MARCH")
+  p=s[i].iloc[-43:,:]
+  plt.legend()
+  plt.subplot(122)
+  plt.plot(p["NewPositiveCases"].sum(),'o',label=i)
+  plt.title("August and half of Sept")
+  plt.legend()
+plt.suptitle("TOTAL NEW POSITIVE CASES RECORDED FOR EACH REGION AT DIFFERENT PERIODS")
+plt.show()
+
+
